@@ -1,51 +1,54 @@
-import 'package:cash_track/home_page.dart';
-import 'package:cash_track/transaction_adapter.dart';
+import 'package:cash_track/models/transaction_adapter.dart';
+import 'package:cash_track/models/transaction.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'pages/auth_gate.dart';
 
 void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(TransactionAdapter());
   await Hive.openBox<Transaction>('transactions');
-  runApp(const CashTrackApp());
+
+  final prefs = await SharedPreferences.getInstance();
+  final themeIndex = prefs.getInt('themeMode') ?? 2;
+
+  runApp(CashTrackApp(initialThemeMode: ThemeMode.values[themeIndex]));
 }
 
-class CashTrackApp extends StatelessWidget {
-  const CashTrackApp({super.key});
+class CashTrackApp extends StatefulWidget {
+  final ThemeMode initialThemeMode;
+  const CashTrackApp({super.key, required this.initialThemeMode});
+
+  @override
+  State<CashTrackApp> createState() => _CashTrackAppState();
+}
+
+class _CashTrackAppState extends State<CashTrackApp> {
+  late ThemeMode _themeMode;
+
+  @override
+  void initState() {
+    super.initState();
+    _themeMode = widget.initialThemeMode;
+  }
+
+  Future<void> _toggleTheme(ThemeMode newTheme) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt('themeMode', newTheme.index);
+    setState(() {
+      _themeMode = newTheme;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CashTrack',
+      title: 'Мій щоденник',
       theme: ThemeData.light(),
-      home: const HomePage(),
+      darkTheme: ThemeData.dark(),
+      themeMode: _themeMode,
+      home: AuthGate(toggleTheme: _toggleTheme, currentThemeMode: _themeMode),
     );
   }
-}
-
-enum TransactionType { income, expense }
-
-@HiveType(typeId: 0)
-class Transaction extends HiveObject {
-  @HiveField(0)
-  final String id;
-  @HiveField(1)
-  final TransactionType type;
-  @HiveField(2)
-  final double amount;
-  @HiveField(3)
-  final String category;
-  @HiveField(4)
-  final DateTime date;
-  @HiveField(5)
-  final String? note;
-
-  Transaction({
-    required this.id,
-    required this.type,
-    required this.amount,
-    required this.category,
-    required this.date,
-    this.note,
-  });
 }

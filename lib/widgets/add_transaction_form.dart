@@ -1,6 +1,6 @@
-import 'package:cash_track/main.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cash_track/models/transaction.dart';
 
 class AddTransactionForm extends StatefulWidget {
   final Transaction? existing;

@@ -1,4 +1,4 @@
-import 'package:cash_track/main.dart';
+import 'package:cash_track/models/transaction.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 class TransactionAdapter extends TypeAdapter<Transaction> {

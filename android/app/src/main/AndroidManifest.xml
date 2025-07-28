@@ -2,7 +2,7 @@
     <application
         android:label="Cash Track"
         android:name="${applicationName}"
-        android:icon="@mipmap/money">
+        android:icon="@mipmap/cash_track">
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -18,8 +18,7 @@
                  to determine the Window background behind the Flutter UI. -->
             <meta-data
               android:name="io.flutter.embedding.android.NormalTheme"
-              android:resource="@style/NormalTheme"
-              />
+              android:value="2" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>

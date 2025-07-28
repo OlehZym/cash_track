@@ -1,19 +1,18 @@
-import 'package:cash_track/add_transaction_form.dart';
-import 'package:cash_track/main.dart';
+import 'package:cash_track/widgets/add_transaction_form.dart';
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-// import 'dart:ui' as ui;
-import 'dart:ui' as ui show TextDirection;
+import 'package:logger/logger.dart';
+import 'package:cash_track/models/transaction.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class CashTrackPage extends StatefulWidget {
+  const CashTrackPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<CashTrackPage> createState() => _CashTrackPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _CashTrackPageState extends State<CashTrackPage> {
   final _box = Hive.box<Transaction>('transactions');
 
   void _addTransaction([Transaction? existing]) async {
@@ -75,14 +74,20 @@ class _HomePageState extends State<HomePage> {
     final balance = income - expense;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('CashTrack')),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _addTransaction,
+        backgroundColor: const Color.fromARGB(255, 0, 38, 255),
+        child: const Icon(Icons.add, size: 30),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Баланс: ${balance.toStringAsFixed(2)} грн',
-                style: Theme.of(context).textTheme.headlineSmall),
+            Text(
+              'Баланс: ${balance.toStringAsFixed(2)} грн',
+              style: Theme.of(context).textTheme.headlineSmall,
+            ),
             const SizedBox(height: 16),
             Expanded(
               child: ValueListenableBuilder(
@@ -109,14 +114,6 @@ class _HomePageState extends State<HomePage> {
           ],
         ),
       ),
-      floatingActionButton: IconButton(
-        onPressed: _addTransaction,
-        icon: const Icon(
-          Icons.add,
-          size: 50,
-          color: Color.fromARGB(255, 0, 38, 255),
-        ),
-      ),
     );
   }
 }
@@ -140,42 +137,73 @@ class TransactionTile extends StatefulWidget {
 class _TransactionTileState extends State<TransactionTile> {
   bool _expanded = false;
   bool _isOverflowing = false;
-  BoxConstraints? _lastConstraints;
+  final _textKey = GlobalKey();
+  final logger = Logger();
 
-  void _checkOverflow(BoxConstraints constraints) {
-    if (_lastConstraints != null &&
-        _lastConstraints!.maxWidth == constraints.maxWidth &&
-        _lastConstraints!.minWidth == constraints.minWidth &&
-        _lastConstraints!.maxHeight == constraints.maxHeight &&
-        _lastConstraints!.minHeight == constraints.minHeight) {
-      return;
+  @override
+  void didUpdateWidget(covariant TransactionTile oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.t.note != widget.t.note) {
+      _expanded = false;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Future.delayed(const Duration(milliseconds: 50), () {
+          _checkOverflow();
+        });
+      });
+      // WidgetsBinding.instance.addPostFrameCallback((_) {
+      //   Future.delayed(const Duration(milliseconds: 50), () {
+      //     _checkOverflow();
+      //     logger.i('_checkOverflow');
+      //   });
+      // });
     }
-    _lastConstraints = constraints;
+  }
 
-    final text = widget.t.note ?? '';
-    final textStyle = DefaultTextStyle.of(context)
-        .style
-        .merge(const TextStyle(color: Colors.grey));
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     _checkOverflow();
+  //   });
+  //   WidgetsBinding.instance.addPostFrameCallback((_) {
+  //     Future.delayed(const Duration(milliseconds: 100), () {
+  //       _checkOverflow();
+  //     });
+  //   });
+  // }
 
-    final span = TextSpan(text: text, style: textStyle);
+  void _checkOverflow() {
+    final textContext = _textKey.currentContext;
+    if (textContext == null) return;
+
+    final textRender = textContext.findRenderObject();
+    if (textRender is! RenderBox) return;
+
+    final height = textRender.size.height;
+
+    final textStyle = DefaultTextStyle.of(context).style.merge(
+          const TextStyle(color: Colors.grey),
+        );
+    final span = TextSpan(
+      text: widget.t.note,
+      style: textStyle,
+    );
 
     final tp = TextPainter(
       text: span,
-      maxLines: 1,
-      textDirection: ui.TextDirection.ltr,
+      textDirection:
+          Directionality.of(context), // получение направления из контекста
     );
-    tp.layout(maxWidth: constraints.maxWidth);
+    tp.layout(maxWidth: textRender.size.width);
+    final oneLineHeight = tp.height;
 
-    final doesOverflow = tp.didExceedMaxLines;
-
-    if (_isOverflowing != doesOverflow) {
-      // Вызываем setState после окончания текущего build
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          setState(() {
-            _isOverflowing = doesOverflow;
-          });
-        }
+    final isOverflow = height < oneLineHeight + 1; // небольшая погрешность
+    logger.i(
+        'oneLineHeight = $oneLineHeight, height = $height, isOverflow = $isOverflow');
+    logger.i('${widget.t.note}');
+    if (_isOverflowing != isOverflow) {
+      setState(() {
+        _isOverflowing = isOverflow;
       });
     }
   }
@@ -184,31 +212,28 @@ class _TransactionTileState extends State<TransactionTile> {
   Widget build(BuildContext context) {
     final t = widget.t;
 
-    return ListTile(
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            '${t.type == TransactionType.income ? '+' : '-'}${t.amount.toStringAsFixed(2)} грн — ${t.category}',
-          ),
-          if (t.note != null && t.note!.isNotEmpty)
-            LayoutBuilder(
-              builder: (context, constraints) {
-                _checkOverflow(constraints);
-
-                return Row(
+    return Column(
+      children: [
+        ListTile(
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${t.type == TransactionType.income ? '+' : '-'}${t.amount.toStringAsFixed(2)} грн — ${t.category}',
+              ),
+              if (t.note != null && t.note!.isNotEmpty)
+                Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Expanded(
                       child: Text(
                         t.note!,
+                        key: _textKey,
                         maxLines: _expanded ? null : 1,
                         overflow: _expanded
                             ? TextOverflow.visible
                             : TextOverflow.ellipsis,
-                        style: DefaultTextStyle.of(context)
-                            .style
-                            .merge(const TextStyle(color: Colors.grey)),
+                        style: const TextStyle(color: Colors.grey),
                       ),
                     ),
                     if (_isOverflowing)
@@ -223,25 +248,26 @@ class _TransactionTileState extends State<TransactionTile> {
                         },
                       ),
                   ],
-                );
-              },
-            ),
-        ],
-      ),
-      subtitle: Text(DateFormat.yMMMd().format(t.date)),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.amber),
-            onPressed: widget.onEdit,
+                ),
+            ],
           ),
-          IconButton(
-            icon: const Icon(Icons.delete, color: Colors.red),
-            onPressed: widget.onDelete,
+          subtitle: Text(DateFormat.yMMMd().format(t.date)),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.edit, color: Colors.amber),
+                onPressed: widget.onEdit,
+              ),
+              IconButton(
+                icon: const Icon(Icons.delete, color: Colors.red),
+                onPressed: widget.onDelete,
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+        const Divider(),
+      ],
     );
   }
 }
