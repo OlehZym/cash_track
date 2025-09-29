@@ -1,40 +1,31 @@
 name: cash_track
-description: Приложение учёта доходов и расходов
+description: "Income and expense recognition application."
 publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.1.0 <4.0.0'
+  sdk: ^3.9.0
 
 dependencies:
   flutter:
     sdk: flutter
   hive: ^2.2.3
   hive_flutter: ^1.1.0
-  path_provider: ^2.1.5
-  fl_chart: ^1.0.0
-  uuid: ^4.5.1
-  intl: ^0.20.2
-  flutter_secure_storage: ^9.2.4
-  local_auth: ^2.3.0
   shared_preferences: ^2.5.3
+  local_auth: ^2.3.0
+  flutter_secure_storage: ^9.2.4
+  intl: ^0.20.2
+  uuid: ^4.5.1
   logger: ^2.6.1
-  connectivity_plus: ^6.1.4
-  http: ^1.4.0
-  shelf: ^1.4.2
-  shelf_router: ^1.1.4
-  shelf_cors_headers: ^0.1.5
-  postgres: ^2.5.4
-  json_annotation: ^4.9.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  flutter_launcher_icons: ^0.14.4
+  hive_generator: ^2.0.0
   build_runner: ^2.4.6
-  hive_generator: ^2.0.1
-  json_serializable: ^6.9.0
+  flutter_launcher_icons: ^0.14.1
+  rename: ^3.1.0
 
 flutter:
   uses-material-design: true

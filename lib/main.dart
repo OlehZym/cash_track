@@ -44,7 +44,7 @@ class _CashTrackAppState extends State<CashTrackApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Мій щоденник',
+      title: 'Cash Track',
       theme: ThemeData.light(),
       darkTheme: ThemeData.dark(),
       themeMode: _themeMode,

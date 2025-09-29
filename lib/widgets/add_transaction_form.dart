@@ -23,8 +23,9 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
   void initState() {
     super.initState();
     final existing = widget.existing;
-    _amountController =
-        TextEditingController(text: existing?.amount.toString());
+    _amountController = TextEditingController(
+      text: existing?.amount.toString(),
+    );
     _categoryController = TextEditingController(text: existing?.category ?? '');
     _noteController = TextEditingController(text: existing?.note ?? '');
     _type = existing?.type ?? TransactionType.income;
@@ -61,103 +62,105 @@ class _AddTransactionFormState extends State<AddTransactionForm> {
       child: Form(
         key: _formKey,
         child: SingleChildScrollView(
-            child: Column(
-          children: [
-            DropdownButtonFormField<TransactionType>(
-              value: _type,
-              decoration: const InputDecoration(
-                labelText: 'Тип',
-                labelStyle: TextStyle(color: Colors.green),
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.green),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-              ),
-              dropdownColor: Colors.white, // Цвет выпадающего меню
-              iconEnabledColor: Colors.green, // Цвет стрелочки
-              items: const [
-                DropdownMenuItem(
-                  value: TransactionType.income,
-                  child: Text('Приход'),
-                ),
-                DropdownMenuItem(
-                  value: TransactionType.expense,
-                  child: Text('Расход'),
-                ),
-              ],
-              onChanged: (val) => setState(() => _type = val!),
-            ),
-            TextFormField(
-              controller: _amountController,
-              cursorColor: Colors.green, // Цвет курсора
-              decoration: const InputDecoration(
-                hintText: 'Сумма',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.green),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              validator: (val) =>
-                  val == null || val.isEmpty ? 'Введите сумму' : null,
-            ),
-            TextFormField(
-              controller: _categoryController,
-              cursorColor: Colors.green,
-              decoration: const InputDecoration(
-                hintText: 'Категория',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.green),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-              ),
-              validator: (val) =>
-                  val == null || val.isEmpty ? 'Введите категорию' : null,
-            ),
-            TextFormField(
-              controller: _noteController,
-              cursorColor: Colors.green,
-              decoration: const InputDecoration(
-                hintText: 'Комментарий',
-                focusedBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.green),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderSide: BorderSide(color: Colors.grey),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButton(
-                  onPressed: _submit,
-                  child: Text(
-                    widget.existing != null ? 'Сохранить' : 'Добавить',
-                    style:
-                        const TextStyle(color: Color.fromARGB(255, 47, 202, 0)),
+          child: Column(
+            children: [
+              DropdownButtonFormField<TransactionType>(
+                initialValue: _type,
+                decoration: const InputDecoration(
+                  labelText: 'Тип',
+                  labelStyle: TextStyle(color: Colors.green),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
                   ),
                 ),
-                const SizedBox(width: 26),
-                TextButton(
-                  onPressed: _close,
-                  child: const Text(
-                    'Закрыть',
-                    style: TextStyle(color: Colors.red),
+                dropdownColor: Colors.white, // Цвет выпадающего меню
+                iconEnabledColor: Colors.green, // Цвет стрелочки
+                items: const [
+                  DropdownMenuItem(
+                    value: TransactionType.income,
+                    child: Text('Приход'),
+                  ),
+                  DropdownMenuItem(
+                    value: TransactionType.expense,
+                    child: Text('Расход'),
+                  ),
+                ],
+                onChanged: (val) => setState(() => _type = val!),
+              ),
+              TextFormField(
+                controller: _amountController,
+                cursorColor: Colors.green, // Цвет курсора
+                decoration: const InputDecoration(
+                  hintText: 'Сумма',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
                   ),
                 ),
-                const SizedBox(width: 16),
-              ],
-            ),
-          ],
-        )),
+                keyboardType: TextInputType.number,
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Введите сумму' : null,
+              ),
+              TextFormField(
+                controller: _categoryController,
+                cursorColor: Colors.green,
+                decoration: const InputDecoration(
+                  hintText: 'Категория',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                ),
+                validator: (val) =>
+                    val == null || val.isEmpty ? 'Введите категорию' : null,
+              ),
+              TextFormField(
+                controller: _noteController,
+                cursorColor: Colors.green,
+                decoration: const InputDecoration(
+                  hintText: 'Комментарий',
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.green),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: _submit,
+                    child: Text(
+                      widget.existing != null ? 'Сохранить' : 'Добавить',
+                      style: const TextStyle(
+                        color: Color.fromARGB(255, 47, 202, 0),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 26),
+                  TextButton(
+                    onPressed: _close,
+                    child: const Text(
+                      'Закрыть',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
